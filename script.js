@@ -72,14 +72,12 @@ window.addEventListener('load', () => {
                 this.speedY = 0;
             }
             this.y += this.speedY;
-            this.projectiles.forEach(projectile => {
-                projectile.update();
-            });
+            this.projectiles.forEach(projectile => projectile.update());
             this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
         }
 
         draw(context) {
-            context.fillStyle = 'yellow';
+            context.fillStyle = 'black';
             context.fillRect(this.x, this.y, this.width, this.height);
             this.projectiles.forEach(projectile => projectile.draw(context));
         }
@@ -98,6 +96,8 @@ window.addEventListener('load', () => {
             this.x = this.game.width;
             this.speedX = Math.random() * -1.5 - 0.5;
             this.markedForDeletion = false;
+            this.lives = 5;
+            this.score = this.lives;
         }
 
         update() {
@@ -108,6 +108,9 @@ window.addEventListener('load', () => {
         draw(context) {
             context.fillStyle = 'red';
             context.fillRect(this.x, this.y, this.width, this.height);
+            context.fillStyle = 'black';
+            context.font = '20px Helvetica';
+            context.fillText(this.lives, this.x, this.y);
         }
     }
 
@@ -131,16 +134,41 @@ window.addEventListener('load', () => {
     class UI {
         constructor(game) {
             this.game = game;
-            this.fontSinze = 25;
+            this.fontSize = 25;
             this.fontFamily = 'Helvetica';
-            this.color = 'yellow';
+            this.color = 'white';
         }
 
         draw(context) {
+            context.save();
             context.fillStyle = this.color;
+            context.shadowOffsetX = 2;
+            context.shadowOffsetY = 2;
+            context.shadowColor = 'black';
+            context.font = `${ this.fontSize }px ${this.fontFamily}`;
+            context.fillText(`Score: ${ this.game.score }`, 20, 40);
             for (let i = 0; i < this.game.ammo; i++) {
                 context.fillRect(20 + 5 * i, 50, 3, 20);
             }
+            if (this.game.gameOver) {
+                context.textAlign = 'center';
+                let message1;
+                let message2;
+
+                if (this.game.score > this.game.winningScore) {
+                    message1 = 'You win!';
+                    message2 = 'Well done!';
+                } else {
+                    message1 = 'You lost!';
+                    message2 = 'Try again next time!';
+                }
+
+                context.font = `50px ${ this.fontFamily }`;
+                context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40);
+                context.font = `25px ${ this.fontFamily }`;
+                context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40);
+            }
+            context.restore();
         }
     }
 
@@ -160,15 +188,17 @@ window.addEventListener('load', () => {
             this.ammoInterval = 500;
             this.enemyInterval = 1000;
             this.gameOver = false;
+            this.score = 0;
+            this.winningScore = 10;
         }
 
         update(deltaTime) {
             this.player.update();
-            if (this.ammoTimer >= this.ammoInterval) {
+            if (this.ammoTimer > this.ammoInterval) {
                 if (this.ammo < this.maxAmmo) {
                     this.ammo++;
-                    this.ammoTimer = 0;
                 }
+                this.ammoTimer = 0;
             } else {
                 this.ammoTimer += deltaTime;
             }
@@ -178,6 +208,21 @@ window.addEventListener('load', () => {
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                 }
+
+                this.player.projectiles.forEach(projectile => {
+                    if (this.checkCollision(projectile, enemy)) {
+                        enemy.lives--;
+                        projectile.markedForDeletion = true;
+                        this.player.projectiles = this.player.projectiles.filter(projectile => !projectile.markedForDeletion);
+                        if (enemy.lives <= 0) {
+                            enemy.markedForDeletion = true;
+                            this.score += enemy.score;
+                            if (this.score > this.winningScore) {
+                                this.gameOver = true;
+                            }
+                        }
+                    }
+                });
             });
 
             this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
@@ -200,10 +245,10 @@ window.addEventListener('load', () => {
         }
 
         checkCollision(rect1, rect2) {
-            return (rect1.x < (rect2.x + rect2.width) &&
-                (rect1.x + rect1.width) > rect2.x &&
-                rect1.y < rect2.y + rect2.height &&
-                (rect1.height + rect1.y) > rect2.y);
+            return ((rect1.x < (rect2.x + rect2.width)) &&
+                ((rect1.x + rect1.width) > rect2.x) &&
+                (rect1.y < (rect2.y + rect2.height)) &&
+                ((rect1.height + rect1.y) > rect2.y));
         }
 
     }
