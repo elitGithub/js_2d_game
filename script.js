@@ -70,13 +70,13 @@ window.addEventListener('load', () => {
             this.angle = 0;
             this.va = Math.random() * 0.2 - 0.1;
             this.bounced = 0;
-            this.bottomBounceBoundary = Math.random() * 100 + 60;
+            this.bottomBounceBoundary = Math.random() * 80 + 60;
         }
 
         update() {
             this.angle += this.va;
             this.speedY += this.gravity;
-            this.x -= this.speedX;
+            this.x -= this.speedX + this.game.speed;
             this.y += this.speedY;
             if (this.y > this.game.height + this.size || this.x < 0 - this.size) {
                 this.markedForDeletion = true;
@@ -88,7 +88,11 @@ window.addEventListener('load', () => {
         }
 
         draw(context) {
-            context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, this.x, this.y, this.size, this.size);
+            context.save();
+            context.translate(this.x, this.y);
+            context.rotate(this.angle);
+            context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, this.size * -0.5, this.size * -0.5, this.size, this.size);
+            context.restore();
         }
     }
 
@@ -141,7 +145,9 @@ window.addEventListener('load', () => {
                 } else {
                     this.powerUpTimer += deltaTime;
                     this.frameY = 1;
-                    this.game.ammo += 0.1;
+                    if (this.game.ammo < this.game.maxAmmo * 2) {
+                        this.game.ammo += 0.1;
+                    }
                 }
             }
         }
@@ -167,14 +173,13 @@ window.addEventListener('load', () => {
         shootBottom() {
             if (this.game.ammo > 0) {
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175));
-                this.game.ammo--;
             }
         }
 
         enterPowerUp() {
             this.powerUpTimer = 0;
             this.powerUp = true;
-            this.game.ammo = this.game.maxAmmo;
+            this.game.ammo = this.game.ammo < this.game.maxAmmo ? this.game.maxAmmo : this.game.ammo;
         }
     }
 
@@ -220,7 +225,7 @@ window.addEventListener('load', () => {
             this.height = 169;
             this.lives = 2;
             this.score = this.lives;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);
+            this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.image = document.getElementById('angler1');
             this.frameY = Math.floor(Math.random() * 3);
         }
@@ -231,7 +236,7 @@ window.addEventListener('load', () => {
             super(game);
             this.width = 213;
             this.height = 165;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);
+            this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.lives = 3;
             this.score = this.lives;
             this.image = document.getElementById('angler2');
@@ -246,10 +251,25 @@ window.addEventListener('load', () => {
             this.height = 95;
             this.lives = 3;
             this.score = 15;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);
+            this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.image = document.getElementById('lucky');
             this.frameY = Math.floor(Math.random() * 2);
             this.type = 'lucky';
+        }
+    }
+
+    class HiveWhale extends Enemy {
+        constructor(game) {
+            super(game);
+            this.width = 400;
+            this.height = 227;
+            this.lives = 15;
+            this.score = this.lives;
+            this.y = Math.random() * (this.game.height * 0.95 - this.height);
+            this.image = document.getElementById('hivewhale');
+            this.frameY = 0;
+            this.type = 'hive';
+            this.speedX = Math.random() * -1.2 - 0.2;
         }
     }
 
@@ -423,7 +443,9 @@ window.addEventListener('load', () => {
                         this.player.projectiles = this.player.projectiles.filter(projectile => !projectile.markedForDeletion);
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
+                            for (let i = 0; i < 10; i++) {
+                                this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
+                            }
                             if (!this.gameOver) {
                                 this.score += enemy.score;
                             }
@@ -446,8 +468,8 @@ window.addEventListener('load', () => {
 
         draw(context) {
             this.background.draw(context);
-            this.player.draw(context);
             this.ui.draw(context);
+            this.player.draw(context);
             this.particles.forEach(particle => particle.draw(context));
             this.enemies.forEach(enemy => enemy.draw(context));
             this.background.layer4.draw(context);
