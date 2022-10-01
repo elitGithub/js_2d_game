@@ -343,7 +343,7 @@ window.addEventListener('load', () => {
             this.y = y;
             this.frameX = 0;
             this.spriteHeight = 200;
-            this.fps = 15;
+            this.fps = 30;
             this.timer = 0;
             this.interval = 1000 / this.fps;
             this.markedForDeletion = false;
@@ -351,6 +351,7 @@ window.addEventListener('load', () => {
         }
 
         update(deltaTime) {
+            this.x -= this.game.speed;
             if (this.timer > this.interval) {
                 this.frameX++;
                 this.timer = 0;
@@ -381,7 +382,11 @@ window.addEventListener('load', () => {
         constructor(game, x, y) {
             super(game, x, y);
             this.image = document.getElementById('fireExplosion');
-
+            this.spriteWidth = 200;
+            this.width = this.spriteWidth;
+            this.height = this.spriteHeight;
+            this.x = x - this.width * 0.5;
+            this.y = y - this.height * 0.5;
         }
     }
 
@@ -566,8 +571,10 @@ window.addEventListener('load', () => {
 
         addExplosion(enemy) {
             const randomize = Math.random();
-            if (randomize < 1) {
+            if (randomize < 0.3) {
                 this.explosions.push(new SmokeExplosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
+            } else {
+                this.explosions.push(new FireExplosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
             }
         }
 
