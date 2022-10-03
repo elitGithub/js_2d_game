@@ -1,7 +1,7 @@
 window.addEventListener('load', () => {
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    canvas.width = 1500;
+    canvas.width = 2000;
     canvas.height = 500;
 
     class InputHandler {
@@ -223,7 +223,7 @@ window.addEventListener('load', () => {
             super(game);
             this.width = 228;
             this.height = 169;
-            this.lives = 2;
+            this.lives = 5;
             this.score = this.lives;
             this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.image = document.getElementById('angler1');
@@ -237,7 +237,7 @@ window.addEventListener('load', () => {
             this.width = 213;
             this.height = 165;
             this.y = Math.random() * (this.game.height * 0.95 - this.height);
-            this.lives = 3;
+            this.lives = 6;
             this.score = this.lives;
             this.image = document.getElementById('angler2');
             this.frameY = Math.floor(Math.random() * 2);
@@ -249,7 +249,7 @@ window.addEventListener('load', () => {
             super(game);
             this.width = 99;
             this.height = 95;
-            this.lives = 3;
+            this.lives = 5;
             this.score = 15;
             this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.image = document.getElementById('lucky');
@@ -263,7 +263,7 @@ window.addEventListener('load', () => {
             super(game);
             this.width = 400;
             this.height = 227;
-            this.lives = 15;
+            this.lives = 20;
             this.score = this.lives;
             this.y = Math.random() * (this.game.height * 0.95 - this.height);
             this.image = document.getElementById('hivewhale');
@@ -343,11 +343,16 @@ window.addEventListener('load', () => {
             this.y = y;
             this.frameX = 0;
             this.spriteHeight = 200;
+            this.spriteWidth = 200;
             this.fps = 30;
             this.timer = 0;
             this.interval = 1000 / this.fps;
             this.markedForDeletion = false;
             this.maxFrame = 8;
+            this.width = this.spriteWidth;
+            this.height = this.spriteHeight;
+            this.x = x - this.width * 0.5;
+            this.y = y - this.height * 0.5;
         }
 
         update(deltaTime) {
@@ -370,11 +375,6 @@ window.addEventListener('load', () => {
         constructor(game, x, y) {
             super(game, x, y);
             this.image = document.getElementById('smokeExplosion');
-            this.spriteWidth = 200;
-            this.width = this.spriteWidth;
-            this.height = this.spriteHeight;
-            this.x = x - this.width * 0.5;
-            this.y = y - this.height * 0.5;
         }
     }
 
@@ -382,11 +382,6 @@ window.addEventListener('load', () => {
         constructor(game, x, y) {
             super(game, x, y);
             this.image = document.getElementById('fireExplosion');
-            this.spriteWidth = 200;
-            this.width = this.spriteWidth;
-            this.height = this.spriteHeight;
-            this.x = x - this.width * 0.5;
-            this.y = y - this.height * 0.5;
         }
     }
 
@@ -459,13 +454,13 @@ window.addEventListener('load', () => {
             this.maxAmmo = 50;
             this.ammoTimer = 0;
             this.enemyTimer = 0;
-            this.ammoInterval = 500;
-            this.enemyInterval = 1000;
+            this.ammoInterval = 350;
+            this.enemyInterval = 2000;
             this.gameOver = false;
             this.score = 0;
-            this.winningScore = 10;
+            this.winningScore = 80;
             this.gameTime = 0;
-            this.timeLimit = 15000;
+            this.timeLimit = 30000;
             this.speed = 1;
             this.debug = false;
         }
@@ -529,9 +524,6 @@ window.addEventListener('load', () => {
                             if (!this.gameOver) {
                                 this.score += enemy.score;
                             }
-                            if (this.score > this.winningScore) {
-                                this.gameOver = true;
-                            }
                         }
                     }
                 });
@@ -562,7 +554,7 @@ window.addEventListener('load', () => {
                 this.enemies.push(new Angler1(this));
             } else if (randomize < 0.6) {
                 this.enemies.push(new Angler2(this));
-            } else if (randomize < 0.8) {
+            } else if (randomize < 0.7) {
                 this.enemies.push(new HiveWhale(this));
             } else {
                 this.enemies.push(new LuckyFish(this));
@@ -571,7 +563,7 @@ window.addEventListener('load', () => {
 
         addExplosion(enemy) {
             const randomize = Math.random();
-            if (randomize < 0.3) {
+            if (randomize < 0.5) {
                 this.explosions.push(new SmokeExplosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
             } else {
                 this.explosions.push(new FireExplosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
