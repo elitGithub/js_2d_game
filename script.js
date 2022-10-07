@@ -465,6 +465,7 @@ window.addEventListener('load', () => {
             this.timeLimit = 30000;
             this.speed = 1;
             this.debug = false;
+            restartBtn.classList.add('hidden');
         }
 
         update(deltaTime) {
@@ -473,6 +474,7 @@ window.addEventListener('load', () => {
             }
             if (this.gameTime > this.timeLimit) {
                 this.gameOver = true;
+                restartBtn.classList.remove('hidden');
             }
 
             this.background.update();
@@ -592,6 +594,8 @@ window.addEventListener('load', () => {
             this.score = 0;
             this.gameOver = false;
             this.restarted = true;
+            this.player.powerUp = false;
+            restartBtn.classList.add('hidden');
         }
 
     }
