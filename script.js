@@ -1,5 +1,6 @@
 window.addEventListener('load', () => {
     const canvas = document.getElementById('canvas1');
+    const restartBtn = document.getElementById('restart');
     const ctx = canvas.getContext('2d');
     canvas.width = 2000;
     canvas.height = 500;
@@ -457,6 +458,7 @@ window.addEventListener('load', () => {
             this.ammoInterval = 350;
             this.enemyInterval = 2000;
             this.gameOver = false;
+            this.restarted = false;
             this.score = 0;
             this.winningScore = 80;
             this.gameTime = 0;
@@ -577,14 +579,37 @@ window.addEventListener('load', () => {
                 ((rect1.height + rect1.y) > rect2.y));
         }
 
+        restart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            this.keys = [];
+            this.enemies = [];
+            this.particles = [];
+            this.explosions = [];
+            this.ammo = 20;
+            this.ammoTimer = 0;
+            this.enemyTimer = 0;
+            this.gameTime = 0;
+            this.score = 0;
+            this.gameOver = false;
+            this.restarted = true;
+        }
+
     }
 
     const game = new Game(canvas.width, canvas.height);
     let lastTime = 0;
+    restartBtn.addEventListener('click', () => {
+        lastTime = 0;
+        game.restart();
+    });
 
     // animation loop
     function animate(timeStamp) {
-        const deltaTime = timeStamp - lastTime;
+        let deltaTime = timeStamp - lastTime;
+        if (game.restarted) {
+            deltaTime = 0;
+            game.restarted = false;
+        }
         lastTime = timeStamp;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         game.draw(ctx);
